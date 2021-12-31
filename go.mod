@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	gioui.org v0.0.0-20211230092323-cce0a121e1b8
+	gioui.org/x v0.0.0-20211230193557-0484e0de5e4d
 	github.com/boltdb/bolt v1.3.1
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gen2brain/beeep v0.0.0-20210529141713-5586760f0cc1

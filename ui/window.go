@@ -18,6 +18,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"gioui.org/x/component"
 	"github.com/gen2brain/beeep"
 	"github.com/gen2brain/dlgs"
 )
@@ -32,9 +33,12 @@ type MainWindow struct {
 	//
 	split *Split
 	//
-	tabs *Tabs
-	plus *widget.Clickable
-	mins *widget.Clickable
+	tabs      *Tabs
+	plus      *widget.Clickable
+	mins      *widget.Clickable
+	medal     *component.ModalLayer
+	dialog    *Dialog
+	dialogbtn *widget.Clickable
 }
 
 func CreateWindow() (*MainWindow, *app.Window) {
@@ -49,10 +53,19 @@ func CreateWindow() (*MainWindow, *app.Window) {
 		saveButton:   &widget.Clickable{},
 		hostsManager: hosts.NewHostFileManager(),
 
-		split: &Split{Ratio: -0.5, Bar: unit.Dp(8)},
-		plus:  &widget.Clickable{},
-		mins:  &widget.Clickable{},
+		split:     &Split{Ratio: -0.5, Bar: unit.Dp(8)},
+		plus:      &widget.Clickable{},
+		mins:      &widget.Clickable{},
+		medal:     component.NewModal(),
+		dialogbtn: &widget.Clickable{},
 	}
+	w.dialog = &Dialog{
+		modal: w.medal,
+		btn:   &widget.Clickable{},
+		pwd:   &widget.Editor{Mask: rune('*')},
+		drag:  &widget.Draggable{},
+	}
+	w.medal.Widget = w.dialog.Widget
 	backup := w.hostsManager.CurrentHostFile()
 	if model.FirstOpen() {
 		w.hostsManager.Create(&model.Host{
@@ -115,6 +128,7 @@ func (m *MainWindow) Loop(w *app.Window, shutdown chan int) error {
 				gtx := layout.NewContext(m.ops, evt)
 				m.Action(gtx)
 				m.Layout(gtx, m.theme)
+				m.medal.Layout(gtx, m.theme)
 				evt.Frame(gtx.Ops)
 			default:
 			}
@@ -221,6 +235,7 @@ func (m *MainWindow) right(gtx C, th *material.Theme) func(gtx C) D {
 					return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 						layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
 						layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
+						layout.Rigid(material.IconButton(th, m.dialogbtn, contentAdd, "xx").Layout),
 					)
 				}
 				save := m.tabs.tabs[m.tabs.selected].saveBtn
@@ -296,6 +311,10 @@ func (m *MainWindow) Action(gtx C) {
 			break
 		}
 		needReload = true
+	}
+
+	for m.dialogbtn.Clicked() {
+		m.dialog.modal.Appear(gtx.Now)
 	}
 
 	for _, v := range updateHost {
