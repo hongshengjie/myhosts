@@ -49,7 +49,7 @@ func CreateWindow() (*MainWindow, *app.Window) {
 		saveButton:   &widget.Clickable{},
 		hostsManager: hosts.NewHostFileManager(),
 
-		split: &Split{Ratio: -0.5},
+		split: &Split{Ratio: -0.5, Bar: unit.Dp(8)},
 		plus:  &widget.Clickable{},
 		mins:  &widget.Clickable{},
 	}
@@ -204,7 +204,7 @@ func (m *MainWindow) right(gtx C, th *material.Theme) func(gtx C) D {
 				func(gtx C) D {
 					index := m.tabs.selected
 					if index == 0 {
-						return material.Label(th, unit.Dp(20), m.hostsManager.CurrentHostFile()).Layout(gtx)
+						return material.Label(th, th.TextSize, m.hostsManager.CurrentHostFile()).Layout(gtx)
 					}
 					list := m.tabs.tabs
 					if len(list) > index {
