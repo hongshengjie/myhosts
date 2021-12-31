@@ -2,7 +2,6 @@ package ui
 
 import (
 	"image"
-	"image/color"
 
 	"gioui.org/layout"
 	"gioui.org/op/clip"
@@ -11,14 +10,12 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
-	"golang.org/x/exp/shiny/materialdesign/colornames"
 )
 
 type Dialog struct {
 	modal *component.ModalLayer
 	btn   *widget.Clickable
 	pwd   *widget.Editor
-	drag  *widget.Draggable
 }
 
 func (d *Dialog) Widget(gtx layout.Context, th *material.Theme, anim *component.VisibilityAnimation) layout.Dimensions {
@@ -29,7 +26,7 @@ func (d *Dialog) Widget(gtx layout.Context, th *material.Theme, anim *component.
 	return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 
 		clip.Rect{Max: image.Pt(150, 150)}.Push(gtx.Ops)
-		paint.ColorOp{Color: color.NRGBA(colornames.White)}.Add(gtx.Ops)
+		paint.ColorOp{Color: th.Bg}.Add(gtx.Ops)
 		paint.PaintOp{}.Add(gtx.Ops)
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Rigid(func(gtx C) D {

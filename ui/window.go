@@ -63,7 +63,6 @@ func CreateWindow() (*MainWindow, *app.Window) {
 		modal: w.medal,
 		btn:   &widget.Clickable{},
 		pwd:   &widget.Editor{Mask: rune('*')},
-		drag:  &widget.Draggable{},
 	}
 	w.medal.Widget = w.dialog.Widget
 	backup := w.hostsManager.CurrentHostFile()
