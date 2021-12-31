@@ -162,7 +162,7 @@ func (m *MainWindow) left(gtx C, th *material.Theme) func(gtx C) D {
 									return D{}
 								}
 								sw := m.tabs.tabs[index].aswitch
-								return layout.UniformInset(unit.Sp(12)).Layout(gtx, func(gtx C) D { return material.Switch(th, sw).Layout(gtx) })
+								return layout.UniformInset(unit.Sp(12)).Layout(gtx, func(gtx C) D { return material.Switch(th, sw, "").Layout(gtx) })
 							}
 
 							dims := material.Clickable(gtx, m.tabs.tabs[index].btn, func(gtx C) D {
@@ -219,17 +219,17 @@ func (m *MainWindow) right(gtx C, th *material.Theme) func(gtx C) D {
 			layout.Rigid(func(gtx C) D {
 				if m.tabs.selected == 0 {
 					return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-						layout.Rigid(material.IconButton(th, m.mins, contentRemove).Layout),
-						layout.Rigid(material.IconButton(th, m.plus, contentAdd).Layout),
+						layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
+						layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
 					)
 				}
 				save := m.tabs.tabs[m.tabs.selected].saveBtn
 
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Rigid(material.IconButton(th, m.mins, contentRemove).Layout),
-					layout.Rigid(material.IconButton(th, m.plus, contentAdd).Layout),
+					layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
+					layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
 					layout.Flexed(1, func(gtx C) D {
-						return layout.E.Layout(gtx, material.IconButton(th, save, contentSave).Layout)
+						return layout.E.Layout(gtx, material.IconButton(th, save, contentSave, "").Layout)
 					}),
 				)
 
@@ -241,7 +241,7 @@ func (m *MainWindow) right(gtx C, th *material.Theme) func(gtx C) D {
 }
 
 func (m *MainWindow) drawPage(gtx C, th *material.Theme) D {
-	return m.split.Layout(gtx, th, m.left(gtx, th), m.right(gtx, th))
+	return m.split.Layout(gtx, m.left(gtx, th), m.right(gtx, th))
 }
 
 func (m *MainWindow) Action(gtx C) {

@@ -1,30 +1,10 @@
 package ui
 
 import (
-	"image"
-	"image/color"
-
 	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"gioui.org/widget"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
-
-func fill(gtx layout.Context, col color.NRGBA) layout.Dimensions {
-	cs := gtx.Constraints
-	d := image.Point{X: cs.Min.X, Y: cs.Min.Y}
-	st := op.Save(gtx.Ops)
-	track := image.Rectangle{
-		Max: d,
-	}
-	clip.Rect(track).Add(gtx.Ops)
-	paint.Fill(gtx.Ops, col)
-	st.Load()
-
-	return layout.Dimensions{Size: d}
-}
 
 // endToEndRow layouts out its content on both ends of its horizontal layout.
 func endToEndRow(gtx layout.Context, leftWidget, rightWidget func(C) D) layout.Dimensions {

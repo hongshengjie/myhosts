@@ -8,9 +8,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"gioui.org/widget/material"
 )
 
 type Split struct {
@@ -25,9 +23,9 @@ type Split struct {
 	dragX  float32
 }
 
-var defaultBarWidth = unit.Dp(5)
+var defaultBarWidth = unit.Dp(10)
 
-func (s *Split) Layout(gtx layout.Context, th *material.Theme, left, right layout.Widget) layout.Dimensions {
+func (s *Split) Layout(gtx layout.Context, left, right layout.Widget) layout.Dimensions {
 	bar := gtx.Px(s.Bar)
 	if bar <= 1 {
 		bar = gtx.Px(defaultBarWidth)
@@ -40,9 +38,6 @@ func (s *Split) Layout(gtx layout.Context, th *material.Theme, left, right layou
 	rightsize := gtx.Constraints.Max.X - rightoffset
 
 	{ // handle input
-		// Avoid affecting the input tree with pointer events.
-		stack := op.Save(gtx.Ops)
-
 		for _, ev := range gtx.Events(s) {
 			e, ok := ev.(pointer.Event)
 			if !ok {
@@ -77,37 +72,27 @@ func (s *Split) Layout(gtx layout.Context, th *material.Theme, left, right layou
 		}
 
 		// register for input
-		barRect := image.Rect(leftsize, gtx.Constraints.Min.Y, rightoffset, gtx.Constraints.Max.X)
-
-		pointer.Rect(barRect).Add(gtx.Ops)
+		barRect := image.Rect(leftsize, 0, rightoffset, gtx.Constraints.Max.X)
+		area := clip.Rect(barRect).Push(gtx.Ops)
 		pointer.InputOp{Tag: s,
 			Types: pointer.Press | pointer.Drag | pointer.Release,
 			Grab:  s.drag,
 		}.Add(gtx.Ops)
-		r := clip.Rect(barRect).Op()
-		paint.FillShape(gtx.Ops, th.ContrastBg, r)
-		stack.Load()
+		area.Pop()
 	}
 
 	{
-		stack := op.Save(gtx.Ops)
-
 		gtx := gtx
 		gtx.Constraints = layout.Exact(image.Pt(leftsize, gtx.Constraints.Max.Y))
 		left(gtx)
-
-		stack.Load()
 	}
 
 	{
-		stack := op.Save(gtx.Ops)
-
-		op.Offset(f32.Pt(float32(rightoffset), 0)).Add(gtx.Ops)
+		off := op.Offset(f32.Pt(float32(rightoffset), 0)).Push(gtx.Ops)
 		gtx := gtx
 		gtx.Constraints = layout.Exact(image.Pt(rightsize, gtx.Constraints.Max.Y))
 		right(gtx)
-
-		stack.Load()
+		off.Pop()
 	}
 
 	return layout.Dimensions{Size: gtx.Constraints.Max}
