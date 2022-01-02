@@ -20,7 +20,6 @@ import (
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
 	"github.com/gen2brain/beeep"
-	"github.com/gen2brain/dlgs"
 )
 
 type MainWindow struct {
@@ -33,12 +32,12 @@ type MainWindow struct {
 	//
 	split *Split
 	//
-	tabs      *Tabs
-	plus      *widget.Clickable
-	mins      *widget.Clickable
-	medal     *component.ModalLayer
-	dialog    *Dialog
-	dialogbtn *widget.Clickable
+	tabs                *Tabs
+	plus                *widget.Clickable
+	mins                *widget.Clickable
+	medal               *component.ModalLayer
+	inputPasswordDialog *PasswordDialog
+	inputTitleDialog    *TitleDialog
 }
 
 func CreateWindow() (*MainWindow, *app.Window) {
@@ -53,18 +52,23 @@ func CreateWindow() (*MainWindow, *app.Window) {
 		saveButton:   &widget.Clickable{},
 		hostsManager: hosts.NewHostFileManager(),
 
-		split:     &Split{Ratio: -0.5, Bar: unit.Dp(8)},
-		plus:      &widget.Clickable{},
-		mins:      &widget.Clickable{},
-		medal:     component.NewModal(),
-		dialogbtn: &widget.Clickable{},
+		split: &Split{Ratio: -0.5, Bar: unit.Dp(8)},
+		plus:  &widget.Clickable{},
+		mins:  &widget.Clickable{},
+		medal: component.NewModal(),
 	}
-	w.dialog = &Dialog{
-		modal: w.medal,
-		btn:   &widget.Clickable{},
-		pwd:   &widget.Editor{Mask: rune('*')},
+	w.inputPasswordDialog = &PasswordDialog{
+		modal:     w.medal,
+		cancelbtn: &widget.Clickable{},
+		pwd:       &widget.Editor{Mask: rune('*'), Submit: true},
 	}
-	w.medal.Widget = w.dialog.Widget
+	w.inputTitleDialog = &TitleDialog{
+		modal:      w.medal,
+		cancelbtn:  &widget.Clickable{},
+		titleInput: &widget.Editor{Submit: true},
+	}
+
+	//w.medal.Widget = w.inputPasswordDialog.Widget
 	backup := w.hostsManager.CurrentHostFile()
 	if model.FirstOpen() {
 		w.hostsManager.Create(&model.Host{
@@ -234,7 +238,6 @@ func (m *MainWindow) right(gtx C, th *material.Theme) func(gtx C) D {
 					return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 						layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
 						layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
-						layout.Rigid(material.IconButton(th, m.dialogbtn, contentAdd, "xx").Layout),
 					)
 				}
 				save := m.tabs.tabs[m.tabs.selected].saveBtn
@@ -298,26 +301,29 @@ func (m *MainWindow) Action(gtx C) {
 
 	// 添加
 	for m.plus.Clicked() {
-		title, _, err := dlgs.Entry("Add hosts", "please name a hosts title", "")
-		if err != nil {
-			break
-		}
-		if title == "" {
-			break
-		}
-		err = m.hostsManager.Create(&model.Host{Title: title})
-		if err != nil {
-			break
-		}
-		needReload = true
+		m.inputTitleDialog.modal.Widget = m.inputTitleDialog.Widget
+		m.inputTitleDialog.modal.Appear(gtx.Now)
 	}
 
-	for m.dialogbtn.Clicked() {
-		m.dialog.modal.Appear(gtx.Now)
-	}
+	for _, v := range m.inputTitleDialog.titleInput.Events() {
+		if e, ok := v.(widget.SubmitEvent); ok {
+			if e.Text == "" {
+				continue
+			}
+			m.inputPasswordDialog.modal.Disappear(gtx.Now)
+			err := m.hostsManager.Create(&model.Host{Title: e.Text})
+			if err != nil {
+				break
+			}
+			needReload = true
 
-	for _, v := range updateHost {
-		m.hostsManager.Update(v)
+		}
+	}
+	for _, v := range m.inputPasswordDialog.pwd.Events() {
+		if e, ok := v.(widget.SubmitEvent); ok {
+			m.hostsManager.SetPwd(e.Text)
+			m.inputPasswordDialog.modal.Disappear(gtx.Now)
+		}
 	}
 
 	// 有两个事件触发 写hosts文件 1. switch 改变 2. switch开的editor ctrl + s
@@ -325,13 +331,14 @@ func (m *MainWindow) Action(gtx C) {
 	if switchChanged || editorSaved || itemdelete {
 		//m.hfm.Write(changeText
 		if m.hostsManager.GetPwd() == "" && runtime.GOOS != "windows" {
-
-			pwd, t, _ := dlgs.Password("password", "")
-			if t {
-				m.hostsManager.SetPwd(pwd)
+			m.inputPasswordDialog.modal.Widget = m.inputPasswordDialog.Widget
+			m.inputPasswordDialog.modal.Appear(gtx.Now)
+		} else {
+			for _, v := range updateHost {
+				m.hostsManager.Update(v)
 			}
+			m.hostsManager.UpdateHostFile()
 		}
-		m.hostsManager.UpdateHostFile()
 	}
 
 	if needReload {

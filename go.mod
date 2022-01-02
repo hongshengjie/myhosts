@@ -8,7 +8,6 @@ require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gen2brain/beeep v0.0.0-20210529141713-5586760f0cc1
-	github.com/gen2brain/dlgs v0.0.0-20211108104213-bade24837f0b
 	golang.org/x/exp v0.0.0-20211221223016-e29036178569
 )
 
