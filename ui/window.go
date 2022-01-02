@@ -206,6 +206,14 @@ func (m *MainWindow) left(gtx C, th *material.Theme) func(gtx C) D {
 
 				})
 			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+						layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
+						layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
+					)
+				})
+			}),
 		)
 		return d
 	}
@@ -235,16 +243,12 @@ func (m *MainWindow) right(gtx C, th *material.Theme) func(gtx C) D {
 
 			layout.Rigid(func(gtx C) D {
 				if m.tabs.selected == 0 {
-					return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-						layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
-						layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
-					)
+					return layout.Dimensions{}
 				}
 				save := m.tabs.tabs[m.tabs.selected].saveBtn
 
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Rigid(material.IconButton(th, m.mins, contentRemove, "").Layout),
-					layout.Rigid(material.IconButton(th, m.plus, contentAdd, "").Layout),
+
 					layout.Flexed(1, func(gtx C) D {
 						return layout.E.Layout(gtx, material.IconButton(th, save, contentSave, "").Layout)
 					}),
