@@ -16,10 +16,10 @@ a cross platform desktop hosts manage application
 2. Drag it to Applications folder
 
 ### Linux 
-
-1.  tar
-2. 
 ```shell
+mkdir myhosts
+tar -C myhosts -xzf myhosts-linux.tar.gz
+cd myhosts 
 sudo make install 
 ```
 
