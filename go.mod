@@ -3,8 +3,8 @@ module myhosts
 go 1.17
 
 require (
-	gioui.org v0.0.0-20220213191812-0d32ab3f62dc
-	gioui.org/x v0.0.0-20220111071509-6849543714b7
+	gioui.org v0.0.0-20220307121938-3e18a310af31
+	gioui.org/x v0.0.0-20220303142034-729e3a00f875
 	github.com/boltdb/bolt v1.3.1
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gen2brain/beeep v0.0.0-20210529141713-5586760f0cc1
